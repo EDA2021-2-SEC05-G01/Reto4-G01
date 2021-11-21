@@ -24,6 +24,8 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
+from DISClib.ADT import graph as gr
 assert cf
 
 
@@ -35,6 +37,7 @@ operación solicitada
 """
 
 def printMenu():
+    print("------------------------------------------------------------------------------------------")
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
     print("2- Consultar los puntos de Interconexión entre los Aeropuertos")
@@ -42,17 +45,28 @@ def printMenu():
     print("4- Consultar la ruta más corta entre dos ciudades")
     print("5- Consultar la mayor cantidad de ciudades que pueden visitarse con Millas de Viajero")
     print("6- Consultar el impacto causado por un aeropuerto cerrado")
+    print("------------------------------------------------------------------------------------------")
 
 catalog = None
+airpfile = 'airports_full.csv'
+routefile = 'routes_full.csv'
+citiesfile = 'worldcities.csv'
 
 """
 Menu principal
 """
 while True:
     printMenu()
-    inputs = input('Seleccione una opción para continuar\n')
+    inputs = input('Seleccione una opción para continuar:\n> ')
     if int(inputs[0]) == 1:
+        print("Inicializando el analizador ....")
+        catalog = controller.init()
         print("Cargando información de los archivos ....")
+        controller.loadINFO(catalog, airpfile, routefile, citiesfile)
+        print("Cantidad de aeropuertos cargados: " + str(mp.size(catalog['Name'])))
+        print("Cantidad de IATAS cargados: " + str(mp.size(catalog['IATA'])))
+        print("Cantidad de Vertices creados: " + str(gr.numVertices(catalog['grafocon'])))
+        print("Cantidad de ciudades cargadas: " + str(mp.size(catalog['infociudad'])))
 
     elif int(inputs[0]) == 2:
         print("Requerimiento 1")
@@ -70,6 +84,8 @@ while True:
         print("Requerimiento 5")
 
     else:
-        print("Cerrando el programa . . . .")
+        print("------------------------------------------------------------------------------------------")
+        print("Cerrando el programa ....")
+        print("------------------------------------------------------------------------------------------")
         sys.exit(0)
 sys.exit(0)
