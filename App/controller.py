@@ -74,9 +74,17 @@ def loadconections(analyzer, routfile):
                                 delimiter=",")
     for vuelo in input_file:
         model.addconexgraf(analyzer, vuelo)
+    model.addgrafodir(analyzer)
+    model.addgrafonodir(analyzer)
     return analyzer
 
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+def primeraeropuerto(analyzer, tipo):
+    return model.primeraeropuerto(analyzer, tipo)
+
+def ultimaciudad(analyzer):
+    return model.ultimaciudad(analyzer)

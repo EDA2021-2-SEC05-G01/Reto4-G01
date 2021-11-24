@@ -46,8 +46,12 @@ def NewAnalyzer():
     analyzer = {
                 'Name': None, #combinación NAME - IATA
                 'IATA': None, #combinación IATA - NAME
-                'grafocon': None, #grafo de conexiones entre aeropuertos
-                'infociudad': None #información de las ciudades donde hay aeropuertos
+                'vuelo-peso':None, #peso del vuelo
+                'grafodir': None, #grafo de conexiones entre aeropuertos dirigido
+                'grafonodir': None, #grafo de conexiones no dirigidas
+                'infociudad': None, #información de las ciudades donde hay aeropuertos
+                'grafodirigido': None, #mapa creado sólo para la carga de datos
+                'grafonodirigido': None #mapa creado sólo para la carga de datos
         }
 
     analyzer['Name'] = mp.newMap(numelements=10702,
@@ -56,12 +60,25 @@ def NewAnalyzer():
     analyzer['infociudad'] = mp.newMap(numelements=41002,
                                         maptype='CHAINING')
 
+    analyzer['grafodirigido'] = mp.newMap(numelements=92605,
+                                        maptype='CHAINING')
+
+    analyzer['vuelo-peso'] = mp.newMap(numelements=92605,
+                                        maptype='CHAINING')
+                                    
+    analyzer['grafonodirigido'] = lt.newList("ARRAY_LIST")
+
     analyzer['IATA'] = mp.newMap(numelements=10702,
                                         maptype='CHAINING',
                                         comparefunction=compareIATAS)
                                     
-    analyzer['grafocon'] = gr.newGraph(datastructure='ADJ_LIST',
+    analyzer['grafodir'] = gr.newGraph(datastructure='ADJ_LIST',
                                         directed=True,
+                                        size=92605,
+                                        comparefunction=compareIATAS)
+
+    analyzer['grafonodir'] = gr.newGraph(datastructure='ADJ_LIST',
+                                        directed=False,
                                         size=92605,
                                         comparefunction=compareIATAS)
 
@@ -71,14 +88,13 @@ def NewAnalyzer():
 
 def addInfo(analyzer, airport):
     addairport(analyzer, airport)
-    addairportgraf(analyzer, airport)
 
 
 
 def addairport(analyzer, airport):
     name = analyzer["Name"]
     iata = analyzer["IATA"]
-    mp.put(name, airport["Name"], airport["IATA"])
+    mp.put(name, airport["Name"], airport)
     mp.put(iata, airport["IATA"], airport["Name"])
     return analyzer
 
@@ -89,22 +105,97 @@ def addcity(analyzer, city):
     mp.put(mapa, name, city)
     return analyzer
 
-def addairportgraf(analyzer, airport):
-    iatair = airport['IATA']
-    try:
-        if not gr.containsVertex(analyzer['grafocon'], iatair):
-                gr.insertVertex(analyzer['grafocon'], iatair)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:addairportgraf')
 
 def addconexgraf(analyzer, vuelo):
-    return None
+    salida = vuelo['Departure']
+    llegada = vuelo['Destination']
+    dir = analyzer['grafodirigido']
+    nodir = analyzer['grafonodirigido']
+
+    #Agrega los vuelos dirigidos al mapa dirigido
+    if mp.contains(dir, salida):
+        lst = mp.get(dir, salida)['value']
+        lt.addLast(lst, llegada)
+        mp.put(dir, salida, lst)
+    else:
+        lst = lt.newList("ARRAY_LIST")
+        lt.addLast(lst, llegada)
+        mp.put(dir, salida, lst)
+    
+    mp.put(analyzer['vuelo-peso'], salida + '-' + llegada, float(vuelo['distance_km']))
+
+    #Código por si el vuelo ya existe de manera dirigida
+    if mp.contains(dir, llegada):
+        lstllegada = mp.get(dir, llegada)['value']
+        if lt.isPresent(lstllegada, salida):
+            lt.addLast(nodir, salida + '-' + llegada)
+            #---------------------------------------------
+            borrar = mp.get(dir, salida)['value']
+            lt.deleteElement(borrar, lt.isPresent(borrar, llegada))
+            mp.put(dir, salida, borrar)
+            #---------------------------------------------
+            mp.put(analyzer['vuelo-peso'], llegada + '-' + salida, float(vuelo['distance_km']))
+    return analyzer
+
+
+def addgrafodir(analyzer):
+    grafo = analyzer['grafodir']
+    dir = analyzer['grafodirigido']
+    pesos = analyzer['vuelo-peso']
+    lstdir = mp.keySet(dir)
+    for dirigidos in lt.iterator(lstdir):
+        gr.insertVertex(grafo, dirigidos)
+        addarcos(grafo, dir, dirigidos, pesos)
+    return analyzer
+
+
+def addarcos(grafo, dir, ini, pesos):
+    lst = mp.get(dir, ini)['value']
+    for fin in lt.iterator(lst):
+        if not gr.containsVertex(grafo, fin):
+            gr.insertVertex(grafo, fin)
+        vuelo = ini + str('-') + fin
+        peso = mp.get(pesos, vuelo)['value']
+        gr.addEdge(grafo, ini, fin, peso)
+    return grafo
+
+
+def addgrafonodir(analyzer):
+    grafo = analyzer['grafonodir']
+    nodir = analyzer['grafonodirigido']
+    pesos = analyzer['vuelo-peso']
+    for dirigidos in lt.iterator(nodir):
+        ver1 = dirigidos[:3]
+        ver2 = dirigidos[4:]
+        if not gr.containsVertex(grafo, ver1):
+            gr.insertVertex(grafo, ver1)
+        if not gr.containsVertex(grafo, ver2):
+            gr.insertVertex(grafo, ver2)
+        peso = mp.get(pesos, dirigidos)['value']
+        gr.addEdge(grafo, ver1, ver2, peso)
+    return analyzer
 
 
 # Funciones para creacion de datos
 
 # Funciones de consulta
+
+def primeraeropuerto(analyzer, tipo):
+    grafo = analyzer['grafo' + tipo]
+    lista = gr.vertices(grafo)
+    ultimo = lt.getElement(lista, 0)
+    iatas = analyzer['IATA']
+    nombre = mp.get(iatas, ultimo)['value']
+    name = analyzer['Name']
+    info = mp.get(name, nombre)['value']
+    return info
+
+def ultimaciudad(analyzer):
+    ciudades = analyzer['infociudad']
+    keys = mp.keySet(ciudades)
+    ultima = lt.lastElement(keys)
+    ultima = mp.get(ciudades, ultima)['value']
+    return ultima
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

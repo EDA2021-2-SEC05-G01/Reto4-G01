@@ -23,9 +23,12 @@
 import config as cf
 import sys
 import controller
+import model
+import threading
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.ADT import graph as gr
+from DISClib.Algorithms.Graphs import dijsktra as dij
 assert cf
 
 
@@ -55,37 +58,64 @@ citiesfile = 'worldcities.csv'
 """
 Menu principal
 """
-while True:
-    printMenu()
-    inputs = input('Seleccione una opción para continuar:\n> ')
-    if int(inputs[0]) == 1:
-        print("Inicializando el analizador ....")
-        catalog = controller.init()
-        print("Cargando información de los archivos ....")
-        controller.loadINFO(catalog, airpfile, routefile, citiesfile)
-        print("Cantidad de aeropuertos cargados: " + str(mp.size(catalog['Name'])))
-        print("Cantidad de IATAS cargados: " + str(mp.size(catalog['IATA'])))
-        print("Cantidad de Vertices creados: " + str(gr.numVertices(catalog['grafocon'])))
-        print("Cantidad de ciudades cargadas: " + str(mp.size(catalog['infociudad'])))
 
-    elif int(inputs[0]) == 2:
-        print("Requerimiento 1")
+def menu():
+    while True:
+        printMenu()
+        inputs = input('Seleccione una opción para continuar:\n> ')
+        if int(inputs[0]) == 1:
+            print("\nInicializando el analizador ....")
+            catalog = controller.init()
+            print("\nCargando información de los archivos ....")
+            controller.loadINFO(catalog, airpfile, routefile, citiesfile)
+            print("\n------------------------------------------------------------------------------------------")
+            print("Cantidad de Aeropuertos Dirigidos: " + str(gr.numVertices(catalog['grafodir'])))
+            print("Cantidad de Vuelos Dirigidos: " + str(gr.numEdges(catalog['grafodir'])))
+            print("\nEl primer Aeropuerto Dirigido Cargado fue: \n")
+            ae = controller.primeraeropuerto(catalog, "dir")
+            print("Nombre: " + str(ae['Name']) + "\nCiudad: " + str(ae['City']) + "\nPaís: " + str(ae["Country"])
+                    + "\nLatitud: " + str(ae['Latitude']) + "\nLongitud: " + str(ae["Longitude"]))
+            print("------------------------------------------------------------------------------------------\n")
+            print("Cantidad de Aeropuertos No Dirigidos: " + str(gr.numVertices(catalog['grafonodir'])))
+            print("Cantidad de Vuelos No Dirigidos: " + str(gr.numEdges(catalog['grafonodir'])))
+            print("\nEl primer Aeropuerto No Dirigido Cargado fue: \n")
+            ae = controller.primeraeropuerto(catalog, "nodir")
+            print("Nombre: " + str(ae['Name']) + "\nCiudad: " + str(ae['City']) + "\nPaís: " + str(ae["Country"])
+                    + "\nLatitud: " + str(ae['Latitude']) + "\nLongitud: " + str(ae["Longitude"]))
+            print("------------------------------------------------------------------------------------------\n")
+            print("Cantidad de Ciudades Cargadas: " + str(mp.size(catalog['infociudad'])))
+            ci = controller.ultimaciudad(catalog)
+            print("Nombre: " + str(ci['city']) + "\nPoblación: " + str(ci['population'])
+                    + "\nLatitud: " + str(ci['lat']) + "\nLongitud: " + str(ci["lng"]))
 
-    elif int(inputs[0]) == 3:
-        print("Requerimiento 2")
+            
 
-    elif int(inputs[0]) == 4:
-        print("Requerimiento 3")
+        elif int(inputs[0]) == 2:
+            print("Requerimiento 1")
+            print("Cantidad de vuelos cargados: " + str(model.contarvuelos(catalog)))
 
-    elif int(inputs[0]) == 5:
-        print("Requerimiento 4")
+        elif int(inputs[0]) == 3:
+            print("Requerimiento 2")
 
-    elif int(inputs[0]) == 6:
-        print("Requerimiento 5")
+        elif int(inputs[0]) == 4:
+            print("Requerimiento 3")
 
-    else:
-        print("------------------------------------------------------------------------------------------")
-        print("Cerrando el programa ....")
-        print("------------------------------------------------------------------------------------------")
-        sys.exit(0)
-sys.exit(0)
+        elif int(inputs[0]) == 5:
+            print("Requerimiento 4")
+
+        elif int(inputs[0]) == 6:
+            print("Requerimiento 5")
+
+        else:
+            print("------------------------------------------------------------------------------------------")
+            print("Cerrando el programa ....")
+            print("------------------------------------------------------------------------------------------")
+            sys.exit(0)
+            sys.exit(0)
+
+
+if __name__ == "__main__":
+    threading.stack_size(67108864)  # 64MB stack
+    sys.setrecursionlimit(2 ** 20)
+    thread = threading.Thread(target=menu)
+    thread.start()
