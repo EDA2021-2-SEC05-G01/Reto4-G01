@@ -102,7 +102,14 @@ def addairport(analyzer, airport):
 def addcity(analyzer, city):
     name = city['city']
     mapa = analyzer['infociudad']
-    mp.put(mapa, name, city)
+    if mp.contains(mapa, name):
+        lst = mp.get(mapa, name)['value']
+        lt.addLast(lst, city)
+        mp.put(mapa, name, lst)
+    else:
+        lst = lt.newList("ARRAY_LIST")
+        lt.addLast(lst, city)
+        mp.put(mapa, name, lst)
     return analyzer
 
 

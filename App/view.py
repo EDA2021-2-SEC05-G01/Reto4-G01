@@ -85,14 +85,16 @@ def menu():
             print("------------------------------------------------------------------------------------------\n")
             print("Cantidad de Ciudades Cargadas: " + str(mp.size(catalog['infociudad'])))
             ci = controller.ultimaciudad(catalog)
-            print("Nombre: " + str(ci['city']) + "\nPoblación: " + str(ci['population'])
-                    + "\nLatitud: " + str(ci['lat']) + "\nLongitud: " + str(ci["lng"]))
+            print("\nLa primera Ciudad Cargada fue: \n")
+            for c in lt.iterator(ci):
+                print("Nombre: " + str(c['city']) + "\nPoblación: " + str(c['population'])
+                    + "\nLatitud: " + str(c['lat']) + "\nLongitud: " + str(c["lng"]))
 
             
 
         elif int(inputs[0]) == 2:
             print("Requerimiento 1")
-            print("Cantidad de vuelos cargados: " + str(model.contarvuelos(catalog)))
+            print(mp.get(catalog['infociudad'], "Washington"))
 
         elif int(inputs[0]) == 3:
             print("Requerimiento 2")
