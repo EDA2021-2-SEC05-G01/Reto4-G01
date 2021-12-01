@@ -39,6 +39,24 @@ se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
 
+#FUNCIONES DE IMPRESIÓN EN LA CONSOLA
+
+def printmayorpuntodeinterconexion(analyzer, aeropuertos, num):
+    print("\n------------------------------------------------------------------------------------------")
+    conexiones = gr.numEdges(analyzer['grafodir']) + gr.numEdges(analyzer['grafonodir'])
+    iatas = analyzer['IATA']
+    print("La cantidad de interconexiones total entre todos los aeropuertos es: " + str(conexiones))
+    print("\n------------------------------------------------------------------------------------------")
+    print("La lista de aeropuertos con la mayor cantidad de interconexiones" + str(lt.size(aeropuertos)) + ":\n")
+    if lt.size(aeropuertos):
+        for ae in lt.iterator(aeropuertos):
+            ae = mp.get(iatas, ae)['value']
+            print("IATA: "+ str(ae['IATA']) + "\nNombre: " + str(ae['Name']) + "\nCiudad: " + str(ae['City'])
+                    + "\nPaís: " + str(ae["Country"]) + "\nCantidad de conexiones: " + str(num))
+
+
+
+
 def printMenu():
     print("------------------------------------------------------------------------------------------")
     print("Bienvenido")
@@ -83,7 +101,7 @@ def menu():
             print("Nombre: " + str(ae['Name']) + "\nCiudad: " + str(ae['City']) + "\nPaís: " + str(ae["Country"])
                     + "\nLatitud: " + str(ae['Latitude']) + "\nLongitud: " + str(ae["Longitude"]))
             print("------------------------------------------------------------------------------------------\n")
-            print("Cantidad de Ciudades Cargadas: " + str(mp.size(catalog['infociudad'])))
+            print("Cantidad de Ciudades Cargadas: " + str(controller.contarciudades(catalog)))
             ci = controller.ultimaciudad(catalog)
             print("\nLa primera Ciudad Cargada fue: \n")
             for c in lt.iterator(ci):
@@ -94,7 +112,8 @@ def menu():
 
         elif int(inputs[0]) == 2:
             print("Requerimiento 1")
-            print(mp.get(catalog['infociudad'], "Washington"))
+            # aeropuertos, num = controller.mayorpuntodeinterconexion(catalog)
+            # printmayorpuntodeinterconexion(catalog, aeropuertos, num)
 
         elif int(inputs[0]) == 3:
             print("Requerimiento 2")

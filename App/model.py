@@ -95,7 +95,7 @@ def addairport(analyzer, airport):
     name = analyzer["Name"]
     iata = analyzer["IATA"]
     mp.put(name, airport["Name"], airport)
-    mp.put(iata, airport["IATA"], airport["Name"])
+    mp.put(iata, airport["IATA"], airport)
     return analyzer
 
 
@@ -193,9 +193,7 @@ def primeraeropuerto(analyzer, tipo):
     ultimo = lt.getElement(lista, 0)
     iatas = analyzer['IATA']
     nombre = mp.get(iatas, ultimo)['value']
-    name = analyzer['Name']
-    info = mp.get(name, nombre)['value']
-    return info
+    return nombre
 
 def ultimaciudad(analyzer):
     ciudades = analyzer['infociudad']
@@ -203,6 +201,46 @@ def ultimaciudad(analyzer):
     ultima = lt.lastElement(keys)
     ultima = mp.get(ciudades, ultima)['value']
     return ultima
+
+
+def mayorpuntodeinterconexion(analyzer):
+    dir = analyzer['grafodir']
+    nodir = analyzer['grafonodir']
+    lstdir = gr.vertices(dir)
+    lstnodir = gr.vertices(nodir)
+    mayornum = 0
+    mayornam = lt.newList("ARRAY_LIST")
+    mayorlocal = None
+    for diri in lt.iterator(lstdir):
+        if lt.isPresent(lstnodir, diri):
+            conteo = gr.degree(dir, diri) + gr.degree(nodir, diri)
+            pos = lt.isPresent(lstnodir, diri)
+            lt.deleteElement(lstnodir, pos)
+        else: 
+            conteo = gr.degree(dir, diri)
+        if conteo > mayornum:
+            mayornum = conteo
+            mayorlocal = diri
+        elif conteo == mayornum:
+            mayornum = conteo
+            lt.addLast(mayornam, mayorlocal)
+            lt.addLast(mayornam, diri)
+    
+    if lt.size(mayornam):
+        return mayornam, mayornum
+    else:
+        retorno = lt.newList("ARRAY_LIST")
+        lt.addLast(retorno, mayorlocal)
+        return retorno, mayornum
+
+
+def contarciudades(analyzer):
+    num = 0
+    lstciudades = mp.keySet(analyzer['infociudad'])
+    for city in lt.iterator(lstciudades):
+        ciudad = mp.get(analyzer['infociudad'], city)['value']
+        num += lt.size(ciudad)
+    return num
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

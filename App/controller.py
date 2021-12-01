@@ -88,3 +88,9 @@ def primeraeropuerto(analyzer, tipo):
 
 def ultimaciudad(analyzer):
     return model.ultimaciudad(analyzer)
+
+def mayorpuntodeinterconexion(analyzer):
+    return model.mayorpuntodeinterconexion(analyzer)
+
+def contarciudades(analyzer):
+    return model.contarciudades(analyzer)
