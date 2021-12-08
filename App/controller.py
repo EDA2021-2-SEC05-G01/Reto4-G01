@@ -48,14 +48,6 @@ def loadINFO(analyzer, airpfile, routefile, citiesfile):
     loadconections(analyzer, routefile)
 
 
-def loadairports(analyzer, airpfile):
-    "Carga la información de los aeropuertos"
-    servicesfile = cf.data_dir + airpfile
-    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
-                                delimiter=",")
-    for airport in input_file:
-        model.addInfo(analyzer, airport)
-    return analyzer
 
 def loadcities(analyzer, citiesfile):
     "Carga la información de las ciudades"
@@ -64,6 +56,16 @@ def loadcities(analyzer, citiesfile):
                                 delimiter=",")
     for city in input_file:
         model.addcity(analyzer, city)
+    return analyzer
+
+
+def loadairports(analyzer, airpfile):
+    "Carga la información de los aeropuertos"
+    servicesfile = cf.data_dir + airpfile
+    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
+                                delimiter=",")
+    for airport in input_file:
+        model.addInfo(analyzer, airport)
     return analyzer
 
 
@@ -81,6 +83,12 @@ def loadconections(analyzer, routfile):
 
 # Funciones de ordenamiento
 
+def clusteresaereos(i1, i2, algk):
+    return model.clusteresaereos(i1, i2, algk)
+
+def ordenar_componentes(lst):
+    return model.ordenar_componentes(lst)
+
 # Funciones de consulta sobre el catálogo
 
 def primeraeropuerto(analyzer, tipo):
@@ -89,8 +97,17 @@ def primeraeropuerto(analyzer, tipo):
 def ultimaciudad(analyzer):
     return model.ultimaciudad(analyzer)
 
-def mayorpuntodeinterconexion(analyzer):
-    return model.mayorpuntodeinterconexion(analyzer)
+def mayorpuntodeinterconexion(analyzer, dir):
+    return model.mayorpuntodeinterconexion(analyzer, dir)
 
 def contarciudades(analyzer):
     return model.contarciudades(analyzer)
+
+def caminomascorto(analyzer, c1, c2, n1, n2):
+    return model.caminomascorto(analyzer, c1, c2, n1, n2)
+
+def aeropuertocerrado(closed, analyzer):
+    return model.aeropuertocerrado(closed, analyzer)
+
+def millasviajero(analyzer, inicio, n):
+    return model.millasviajero(analyzer, inicio, n)
